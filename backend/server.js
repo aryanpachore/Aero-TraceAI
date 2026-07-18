@@ -3,35 +3,52 @@ import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Local ES Module imports (must include .js)
 import { sequelize, Zone } from './models/index.js'; 
 import { fetchAirQualityData } from './services/ingestionService.js';
-import { register, login } from './controllers/authController.js'; // <-- NEW MANUAL AUTH IMPORTS
-import { getZoneInsights } from './controllers/analyticsController.js'; 
+import { register, login } from './controllers/authController.js'; 
+// <-- UPDATED IMPORT TO INCLUDE getOptimizedRoutes
+import { getZoneInsights, getOptimizedRoutes } from './controllers/analyticsController.js'; 
 import { getZoneAdvisories } from './controllers/advisoryController.js'; 
-import { submitCitizenAlert, upload } from './controllers/alertController.js'; 
-import { getLocalDashboardData } from './controllers/locationController.js'; // <-- NEW LOCATION IMPORT
+import { submitCitizenAlert, getAllAlerts, upload } from './controllers/alertController.js'; 
+import { getLocalDashboardData } from './controllers/locationController.js';
+import { logIntervention, getInterventionsByZone } from './controllers/interventionController.js'; 
 
 dotenv.config();
+
+// Resolve __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Expose the uploads folder to the frontend to serve citizen images
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // --- API Routes ---
 
 // Authentication Routes (Manual Email/Password)
-app.post('/api/auth/register', register); // <-- NEW ROUTE
-app.post('/api/auth/login', login);       // <-- NEW ROUTE
+app.post('/api/auth/register', register);
+app.post('/api/auth/login', login); 
 
 // Analytics & AI Routes
 app.get('/api/insights/:zoneId', getZoneInsights); 
+app.get('/api/routes/optimize', getOptimizedRoutes); // <-- NEW ROUTE ADDED HERE
 app.get('/api/advisories/:zoneId', getZoneAdvisories); 
 
 // Citizen App Routes
 app.post('/api/alerts', upload.single('image'), submitCitizenAlert); 
-app.get('/api/dashboard/local', getLocalDashboardData); // <-- NEW ROUTE
+app.get('/api/dashboard/local', getLocalDashboardData); 
+
+// Admin App Routes
+app.get('/api/alerts', getAllAlerts); 
+app.post('/api/interventions', logIntervention); 
+app.get('/api/interventions/:zoneId', getInterventionsByZone); 
 
 // --- Initialize Database & Start Server ---
 sequelize.sync({ alter: true }).then(async () => {

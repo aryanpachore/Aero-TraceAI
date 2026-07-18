@@ -1,122 +1,84 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import CitizenDashboard from '@/components/CitizenDashboard';
+import AdminDashboard from '@/components/AdminDashboard';
+import LandingPage from '@/components/LandingPage';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Global Auth State: null | 'citizen' | 'admin'
+  const [authRole, setAuthRole] = useState(null);
+
+  const handleLogout = () => {
+    setAuthRole(null);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Router>
+      <div className="min-h-screen bg-background text-foreground flex flex-col antialiased">
+        
+        {/* Only render the top Nav Bar if a user is successfully logged in */}
+        {authRole && (
+          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="container flex h-16 items-center justify-between mx-auto px-4 md:px-6">
+              
+              <div className="flex items-center gap-4">
+                <div className="font-bold tracking-tight text-xl bg-gradient-to-r from-slate-900 to-slate-600 dark:from-slate-50 dark:to-slate-400 bg-clip-text text-transparent">
+                  Aero TraceAI
+                </div>
+                {/* Visual indicator of current role */}
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${authRole === 'admin' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                  {authRole} Portal
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <LogOut className="h-4 w-4" /> Exit
+                </button>
+              </div>
+            </div>
+          </header>
+        )}
 
-      <div className="ticks"></div>
+        <main className="flex-1 flex flex-col">
+          <Routes>
+            {/* The Entry Gateway */}
+            <Route 
+              path="/" 
+              element={
+                !authRole ? <LandingPage setAuthRole={setAuthRole} /> : 
+                authRole === 'admin' ? <Navigate to="/admin" replace /> : 
+                <Navigate to="/citizen" replace />
+              } 
+            />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            {/* Locked Citizen Route */}
+            <Route 
+              path="/citizen" 
+              element={
+                authRole === 'citizen' ? <CitizenDashboard /> : <Navigate to="/" replace />
+              } 
+            />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            {/* Locked Admin Route */}
+            <Route 
+              path="/admin" 
+              element={
+                authRole === 'admin' ? <AdminDashboard /> : <Navigate to="/" replace />
+              } 
+            />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;

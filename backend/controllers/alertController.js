@@ -1,105 +1,58 @@
 // backend/controllers/alertController.js
 import multer from 'multer';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Zone, CitizenAlert } from '../models/index.js';
-import dotenv from 'dotenv';
+import path from 'path';
+import { CitizenAlert, Zone } from '../models/index.js';
 
-dotenv.config();
+// Configure Multer for Image Storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Ensure you have an 'uploads' folder in your backend root!
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// 1. Configure Multer to store the incoming image in memory (faster for AI processing)
-const storage = multer.memoryStorage();
-export const upload = multer({ storage: storage });
-
-// Helper: Haversine distance formula to find the closest zone
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-  const R = 6371; 
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c; 
-}
+export const upload = multer({ storage });
 
 export const submitCitizenAlert = async (req, res) => {
   try {
-    const { lat, lng, userId } = req.body;
-    const file = req.file;
+    const { latitude, longitude, vulnerability } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!file || !lat || !lng) {
-      return res.status(400).json({ error: "Image, latitude, and longitude are required." });
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: "GPS coordinates are required to log an alert." });
     }
 
-    console.log('[Vision Agent] Analyzing uploaded image...');
+    // Default intensity for a new alert, to be analyzed by AI later
+    const initialIntensity = 75; 
 
-    // 2. Prepare the image for Gemini
-    const imagePart = {
-      inlineData: {
-        data: file.buffer.toString("base64"),
-        mimeType: file.mimetype
-      }
-    };
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
-    const prompt = `
-      Analyze this image. Is there active environmental pollution occurring? Look for factory smoke, open waste burning, or severe construction dust.
-      Return ONLY a strict JSON object. No markdown, no backticks.
-      Expected Format:
-      {
-        "isPolluting": true/false,
-        "type": "Waste Burning" (or "Dust", "Smoke", "None"),
-        "severity": 1-10
-      }
-    `;
-
-    // 3. Call Gemini Vision
-    const result = await model.generateContent([prompt, imagePart]);
-    let rawOutput = result.response.text();
-    rawOutput = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-    const aiAnalysis = JSON.parse(rawOutput);
-
-    if (!aiAnalysis.isPolluting) {
-      return res.status(200).json({ message: "Image processed. No pollution detected. Alert discarded." });
-    }
-
-    // 4. Find the closest Zone using the Haversine formula
-    const zones = await Zone.findAll();
-    let closestZone = null;
-    let shortestDistance = Infinity;
-
-    zones.forEach(zone => {
-      const distance = getDistanceFromLatLonInKm(lat, lng, zone.centerLat, zone.centerLng);
-      if (distance < shortestDistance) {
-        shortestDistance = distance;
-        closestZone = zone;
-      }
-    });
-
-    if (!closestZone) {
-      return res.status(404).json({ error: "No monitoring zones found near this location." });
-    }
-
-    // 5. Save the verified alert to the database
+    // Create the alert in the database
     const newAlert = await CitizenAlert.create({
-      zoneId: closestZone.id,
-      userId: userId || null, // Nullable if they didn't log in
-      type: aiAnalysis.type,
-      severity: aiAnalysis.severity,
-      lat: parseFloat(lat),
-      lng: parseFloat(lng),
-      isVerified: true, // Automatically verified by AI!
-      imageUrl: 'local_upload' // In a real production app, you'd upload the buffer to AWS S3 here
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+      imageUrl,
+      intensity: initialIntensity,
+      status: 'Pending Verification',
+      locationName: 'Citizen Reported Hotspot',
+      zoneId: 1 // Defaulting to Zone 1 for the demo scope
     });
 
-    res.status(201).json({
-      message: `Pollution verified! Alert assigned to ${closestZone.name}.`,
-      alert: newAlert
-    });
-
+    res.status(201).json({ message: "Alert successfully transmitted to Command Center.", alert: newAlert });
   } catch (error) {
-    console.error('[Vision Agent] Error:', error);
-    res.status(500).json({ error: "Failed to process citizen alert." });
+    console.error("❌ [Alert Engine] Failed to process citizen report:", error);
+    res.status(500).json({ error: "Failed to submit alert." });
+  }
+};
+
+export const getAllAlerts = async (req, res) => {
+  try {
+    const alerts = await CitizenAlert.findAll({
+      order: [['createdAt', 'DESC']]
+    });
+    res.status(200).json(alerts);
+  } catch (error) {
+    console.error("❌ [Alert Engine] Failed to fetch alerts:", error);
+    res.status(500).json({ error: "Failed to fetch map data." });
   }
 };

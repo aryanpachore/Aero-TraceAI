@@ -6,6 +6,7 @@ import User from './User.js';
 import AttributionInsight from './AttributionInsight.js';
 import Advisory from './Advisory.js';
 import CitizenAlert from './CitizenAlert.js';
+import InterventionLog from './InterventionLog.js'; // <-- NEW IMPORT
 
 // --- Define Database Relationships ---
 
@@ -29,6 +30,10 @@ CitizenAlert.belongsTo(Zone, { foreignKey: 'zoneId' });
 User.hasMany(CitizenAlert, { foreignKey: 'userId' });
 CitizenAlert.belongsTo(User, { foreignKey: 'userId' });
 
+// Zone <-> InterventionLog (To track compliance and actions per zone)
+Zone.hasMany(InterventionLog, { foreignKey: 'zoneId' }); // <-- NEW RELATIONSHIP
+InterventionLog.belongsTo(Zone, { foreignKey: 'zoneId' }); // <-- NEW RELATIONSHIP
+
 export {
   sequelize,
   Zone,
@@ -36,5 +41,6 @@ export {
   User,
   AttributionInsight,
   Advisory,
-  CitizenAlert
+  CitizenAlert,
+  InterventionLog // <-- EXPORTED
 };
