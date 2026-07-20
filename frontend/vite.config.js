@@ -14,7 +14,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    cssMinify: 'esbuild', // Instructs Vite to use esbuild instead of lightningcss for minification
-  },
 })
