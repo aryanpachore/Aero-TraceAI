@@ -95,7 +95,7 @@ export default function CitizenDashboard() {
     const fetchAdvisory = async () => {
       setIsFetchingAdvice(true);
       try {
-        const res = await axios.get(`http://localhost:5000/api/advisories/1`, {
+        const res = await axios.get(`https://aero-traceai.onrender.com/api/advisories/1`, {
           params: { healthProfile: vulnerability, language, aqi: localAqi, t: Date.now() }
         });
         setAiAdvice(res.data.advisory);
@@ -112,7 +112,7 @@ export default function CitizenDashboard() {
   useEffect(() => {
     const fetchSourceInsights = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/insights/1');
+        const res = await axios.get('https://aero-traceai.onrender.com/api/insights/1');
         
         if (res.data && res.data.confidenceBreakdown) {
           const dynamicCulprits = [

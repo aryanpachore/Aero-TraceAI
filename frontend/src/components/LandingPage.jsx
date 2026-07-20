@@ -151,7 +151,7 @@ export default function LandingPage({ setAuthRole, setAdminCity }) {
     setErrorMsg('');
 
     try {
-      const endpoint = isLogin ? 'http://localhost:5000/api/auth/login' : 'http://localhost:5000/api/auth/register';
+      const endpoint = isLogin ? 'https://aero-traceai.onrender.com/api/auth/login' : 'https://aero-traceai.onrender.com/api/auth/register';
 
       const payload = isLogin
         ? { email, password, role: selectedPath }

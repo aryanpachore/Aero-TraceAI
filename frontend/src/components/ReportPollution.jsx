@@ -56,7 +56,7 @@ export default function ReportPollution() {
     formData.append('locationName', location.name);
 
     try {
-      await axios.post('http://localhost:5000/api/alerts', formData, {
+      await axios.post('https://aero-traceai.onrender.com/api/alerts', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       

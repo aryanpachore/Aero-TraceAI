@@ -26,7 +26,7 @@ export default function AdminDashboard({ jurisdiction }) {
   const fetchHotspots = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/alerts', {
+      const response = await axios.get('https://aero-traceai.onrender.com/api/alerts', {
         params: { city: jurisdiction }
       });
       
@@ -39,7 +39,7 @@ export default function AdminDashboard({ jurisdiction }) {
           name: alert.locationName || "Citizen Reported Hotspot",
           status: alert.status || "Pending Verification",
           imageUrl: alert.imageUrl 
-            ? (alert.imageUrl.startsWith('http') ? alert.imageUrl : `http://localhost:5000${alert.imageUrl}`) 
+            ? (alert.imageUrl.startsWith('http') ? alert.imageUrl : `https://aero-traceai.onrender.com${alert.imageUrl}`) 
             : null,
           type: alert.type || 'citizen', 
           timestamp: alert.createdAt || new Date().toISOString()
