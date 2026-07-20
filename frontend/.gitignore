@@ -24,3 +24,23 @@ dist-ssr
 *.sw?
 
 
+# /frontend/.gitignore
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+*.local
+
+# Build outputs
+build/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS Generated Files
+.DS_Store
+Thumbs.db

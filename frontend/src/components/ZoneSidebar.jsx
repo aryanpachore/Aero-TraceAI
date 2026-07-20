@@ -1,246 +1,163 @@
-// src/components/ZoneSidebar.jsx
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, FileText, Factory, Car, ShieldAlert, Plus } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Activity, Star, Megaphone, Building2, AlertTriangle, MapPin, CameraOff } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
-// Define Framer Motion variants for staggered animations
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-};
+export default function ZoneSidebar({ selectedZone, hotspots, onSelectZone }) {
+  
+  const citizenReports = hotspots.filter(h => h.type === 'citizen');
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
-
-export default function ZoneSidebar({ selectedZone, getColor, onActionLogged }) {
-  const [insights, setInsights] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [actionInput, setActionInput] = useState('');
-  const [pastLogs, setPastLogs] = useState([]);
-
-  useEffect(() => {
-    if (!selectedZone) return;
-
-    const fetchZoneIntelligence = async () => {
-      setLoading(true);
-      try {
-        const insightRes = await axios.get(`http://localhost:5000/api/insights/${selectedZone.id}`);
-        setInsights(insightRes.data);
-
-        const logsRes = await axios.get(`http://localhost:5000/api/interventions/${selectedZone.id}`);
-        setPastLogs(logsRes.data);
-      } catch (err) {
-        console.error("Failed to gather intelligence profile:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchZoneIntelligence();
-  }, [selectedZone]);
-
-  const handleLogAction = async (e) => {
-    e.preventDefault();
-    if (!actionInput.trim()) return;
-
-    try {
-      const res = await axios.post('http://localhost:5000/api/interventions', {
-        zoneId: selectedZone.id,
-        actionTaken: actionInput,
-        notes: `Manual dispatch log execution targeting localized pollutants.`
-      });
-      setPastLogs([res.data, ...pastLogs]);
-      setActionInput('');
-      if (onActionLogged) onActionLogged();
-    } catch (err) {
-      console.error("Audit log creation failure:", err);
-    }
-  };
-
-  if (!selectedZone) {
-    return (
-      <Card className="h-auto lg:h-[700px] flex flex-col items-center justify-center text-muted-foreground p-6 text-center border-slate-200 dark:border-slate-800">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-        >
-          <Activity className="h-12 w-12 opacity-20 mb-4" />
-        </motion.div>
-        <h3 className="text-lg font-medium">No Monitoring Area Highlighted</h3>
-        <p className="text-sm text-muted-foreground/80 mt-1 max-w-xs">Select a dynamic map vector component node to extract active Groq metrics matrix.</p>
-      </Card>
-    );
-  }
-
-  const confidence = insights?.confidenceBreakdown || { traffic: 33, industrial: 33, dust: 34 };
+  const correlationData = [
+    { permit: 'BPL-CON-2291', site: 'Arora Village Metro Extension', status: 'ACTIVE — NO DUST NET', statusColor: 'text-[#f87171] bg-[#f87171]/10 border-[#f87171]/20' },
+    { permit: 'BPL-CON-1187', site: 'Chhatrasal Nagar Residential Tower', status: 'FLAGGED — EXPIRED PERMIT', statusColor: 'text-[#facc15] bg-[#facc15]/10 border-[#facc15]/20' },
+    { permit: 'BPL-CON-3040', site: 'NH46 Road Widening', status: 'ACTIVE — COMPLIANT', statusColor: 'text-[#f87171] bg-[#f87171]/10 border-[#f87171]/20' },
+  ];
 
   return (
-    <Card className="h-auto lg:h-[700px] flex flex-col border-slate-200 dark:border-slate-800 overflow-hidden">
-      <CardHeader className="border-b bg-muted/20 pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg md:text-xl font-bold truncate">{selectedZone.name}</CardTitle>
-          <span className="text-xs px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono">ID: {selectedZone.id}</span>
-        </div>
-        <CardDescription>Live Cloud Core Ingestion Real-time Feed Mapping Matrix</CardDescription>
-      </CardHeader>
+    <div className="flex flex-col gap-6 lg:col-span-1">
       
-      <CardContent className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div 
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="h-48 flex flex-col items-center justify-center space-y-2"
-            >
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="text-xs text-muted-foreground">Running Groq Fingerprinting Engine...</p>
-            </motion.div>
+      {/* ================= TOP PANEL: SELECTED LOCATION ================= */}
+      {/* FIX: Removed flex-1 so it naturally conforms to its content height on mobile */}
+      <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl flex flex-col overflow-hidden">
+        <div className="p-4 border-b border-slate-800/50 bg-slate-800/20">
+          <h3 className="text-xs font-bold text-slate-300 tracking-widest uppercase flex items-center gap-2">
+            <Star className="h-4 w-4 text-slate-400" /> Selected Location
+          </h3>
+        </div>
+        
+        {!selectedZone ? (
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center min-h-[250px]">
+            <Activity className="h-10 w-10 text-slate-600 mb-4 opacity-50" />
+            <h4 className="text-lg font-bold text-slate-300 mb-2">No location selected</h4>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Click a marker on the map to view details.
+            </p>
+          </CardContent>
+        ) : selectedZone.type === 'citizen' ? (
+          <CardContent className="p-6 flex flex-col gap-4">
+            <div className="w-full h-48 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex items-center justify-center relative">
+              {selectedZone.imageUrl ? (
+                <img 
+                  src={selectedZone.imageUrl} 
+                  alt="Citizen uploaded evidence" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className={`flex flex-col items-center justify-center text-slate-600 ${selectedZone.imageUrl ? 'hidden' : 'flex'}`}>
+                <CameraOff className="h-8 w-8 mb-2" />
+                <span className="text-xs font-bold uppercase tracking-widest">No Image</span>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-white text-lg leading-tight">{selectedZone.name}</h4>
+              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                <MapPin className="h-3 w-3" /> {selectedZone.pos[0].toFixed(4)}, {selectedZone.pos[1].toFixed(4)}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+              <div className="bg-slate-800/30 p-3 rounded-lg border border-slate-700/50 text-center">
+                <span className="text-slate-500 text-[10px] block mb-1 uppercase tracking-widest font-bold">Severity</span>
+                <span className="text-[#f87171] font-black">{selectedZone.intensity} / 100</span>
+              </div>
+              <div className="bg-slate-800/30 p-3 rounded-lg border border-slate-700/50 text-center">
+                <span className="text-slate-500 text-[10px] block mb-1 uppercase tracking-widest font-bold">Status</span>
+                <span className="text-[#facc15] font-black text-[10px] uppercase tracking-wider">{selectedZone.status}</span>
+              </div>
+            </div>
+          </CardContent>
+        ) : (
+          <CardContent className="p-6 flex flex-col gap-6">
+            <div className="w-full h-24 bg-slate-800/50 border border-slate-700/50 rounded-xl flex flex-col items-center justify-center text-teal-400">
+               <Activity className="h-6 w-6 mb-2 animate-pulse" />
+               <span className="text-[10px] font-bold uppercase tracking-widest">CAAQMS Live Feed</span>
+            </div>
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between items-center border-b border-slate-800/50 pb-3">
+                <span className="text-slate-500">Station</span>
+                <span className="font-bold text-white text-right break-words max-w-[60%]">{selectedZone.name}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800/50 pb-3">
+                <span className="text-slate-500">Live AQI</span>
+                <span className="font-black text-[#f87171] text-lg">{selectedZone.intensity}</span>
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* ================= MIDDLE PANEL: CITIZEN REPORTS QUEUE ================= */}
+      <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl flex flex-col overflow-hidden max-h-[300px]">
+        <div className="p-4 border-b border-slate-800/50 flex justify-between items-center sticky top-0 bg-slate-900/90 z-10">
+          <h3 className="text-xs font-bold text-slate-300 tracking-widest uppercase flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-slate-400" /> Report Queue
+          </h3>
+          <span className="text-[10px] text-slate-500 font-bold">{citizenReports.length} TOTAL</span>
+        </div>
+        
+        <CardContent className="p-0 overflow-y-auto">
+          {citizenReports.length === 0 ? (
+            <div className="p-6 text-center text-slate-500 text-sm">No recent citizen reports.</div>
           ) : (
-            <motion.div 
-              key="content"
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
-              className="space-y-6"
-            >
-              {/* Primary Analysis Module */}
-              <motion.div variants={itemVariants} className="flex items-center justify-between bg-secondary/30 p-4 rounded-xl border">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Reported Primary Culprit</p>
-                  <h4 className="text-lg font-bold mt-1 text-primary capitalize">{insights?.primaryCulprit || "Calculating..."}</h4>
-                </div>
-                <motion.div 
-                  initial={{ rotate: -20, scale: 0.8 }}
-                  animate={{ rotate: 0, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                >
-                  <ShieldAlert className="h-8 w-8 text-orange-500 opacity-80" />
-                </motion.div>
-              </motion.div>
-
-              {/* Source Percentage Bars */}
-              <motion.div variants={itemVariants} className="space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                  <Activity className="h-3.5 w-3.5" /> Groq Confidence Matrix
-                </h4>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-xs font-medium mb-1">
-                      <span className="flex items-center gap-1"><Car className="h-3 w-3"/> Vehicular Fleets</span>
-                      <span>{confidence.traffic}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${confidence.traffic}%` }}
-                        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-                        className="h-full bg-orange-500"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-medium mb-1">
-                      <span className="flex items-center gap-1"><Factory className="h-3 w-3"/> Point-Source Exhaust</span>
-                      <span>{confidence.industrial}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${confidence.industrial}%` }}
-                        transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-                        className="h-full bg-red-500" 
-                      />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* VISUAL EVIDENCE BLOCK */}
-              {selectedZone.imageUrl && (
-                <motion.div variants={itemVariants} className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                    <span>Field Evidence</span>
-                    <span className="text-[10px] bg-orange-500/20 text-orange-500 px-2 py-0.5 rounded uppercase">{selectedZone.status}</span>
-                  </h4>
-                  <div className="relative rounded-lg overflow-hidden border-2 border-border shadow-sm group">
-                    <img 
-                      src={selectedZone.imageUrl} 
-                      alt="Citizen Evidence" 
-                      className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={(e) => { e.target.style.display = 'none' }} // Hides gracefully if image is missing
-                    />
-                    <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2">
-                      <p className="text-[10px] text-white/90 font-mono">Citizen Uploaded Payload</p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Descriptive AI Insight Text Block */}
-              <motion.div variants={itemVariants} className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">AI Intelligence Narrative</h4>
-                <p className="text-xs leading-relaxed bg-slate-50 dark:bg-slate-900 p-3.5 rounded-lg border border-dashed">
-                  {insights?.aiSummary || "System parsing input plume patterns context array..."}
-                </p>
-              </motion.div>
-
-              {/* Inline Intervention Insertion Input */}
-              <motion.div variants={itemVariants} className="space-y-3 pt-2 border-t">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Log Immediate Mitigation</h4>
-                <form onSubmit={handleLogAction} className="flex gap-2">
-                  <Input 
-                    value={actionInput}
-                    onChange={(e) => setActionInput(e.target.value)}
-                    placeholder="e.g., Deploy water trucks..." 
-                    className="text-xs h-9"
-                  />
-                  <Button type="submit" size="sm" className="h-9 px-3 shrink-0"><Plus className="h-4 w-4 mr-1"/> Log</Button>
-                </form>
-              </motion.div>
-
-              {/* Historical Verification Feed */}
-              <motion.div variants={itemVariants} className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                  <FileText className="h-3.5 w-3.5" /> Audit Trail ({pastLogs.length})
-                </h4>
-                <div className="max-h-40 overflow-y-auto space-y-2 rounded-lg border bg-muted/10 p-2">
-                  {pastLogs.length === 0 ? (
-                    <p className="text-[11px] text-muted-foreground text-center py-4">No logged mitigation data registered for this node boundary.</p>
-                  ) : (
-                    <AnimatePresence>
-                      {pastLogs.map((log) => (
-                        <motion.div 
-                          key={log.id} 
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="text-[11px] bg-background border p-2 rounded flex flex-col gap-0.5 shadow-2xs"
-                        >
-                          <span className="font-semibold text-foreground/90">{log.actionTaken}</span>
-                          <span className="text-muted-foreground/70 font-mono text-[9px]">
-                            {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {log.loggedBy}
-                          </span>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
+            citizenReports.map((spot, idx) => (
+              <div 
+                key={spot.id || idx} 
+                onClick={() => onSelectZone(spot)} 
+                className={`p-4 border-b border-slate-800/50 flex gap-4 cursor-pointer transition-colors ${selectedZone?.id === spot.id ? 'bg-slate-800/80 border-l-4 border-l-[#f87171]' : 'hover:bg-slate-800/30 border-l-4 border-l-transparent'}`}
+              >
+                 <div className="w-10 h-10 rounded-lg bg-[#f87171]/10 border border-[#f87171]/20 flex items-center justify-center shrink-0">
+                   <AlertTriangle className="h-4 w-4 text-[#f87171]" />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                   <div className="flex justify-between items-start mb-1">
+                     <h4 className="font-bold text-sm text-slate-200 truncate">{spot.name}</h4>
+                   </div>
+                   <p className="text-xs text-slate-500 truncate">Intensity: {spot.intensity}</p>
+                 </div>
+              </div>
+            ))
           )}
-        </AnimatePresence>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* ================= BOTTOM PANEL: CONSTRUCTION CORRELATION ================= */}
+      <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-slate-800/50 bg-slate-800/20">
+          <h3 className="text-xs font-bold text-slate-300 tracking-widest uppercase flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-slate-400" /> Correlation
+          </h3>
+        </div>
+        
+        {/* FIX: Added overflow-x-auto so the table can scroll horizontally on small phones */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-400 whitespace-nowrap">
+            <thead className="text-[10px] uppercase tracking-widest text-slate-500 bg-slate-900/40">
+              <tr>
+                <th className="px-4 py-3 font-medium">Permit</th>
+                <th className="px-4 py-3 font-medium">Site</th>
+                <th className="px-4 py-3 font-medium text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/50">
+              {correlationData.map((row, idx) => (
+                <tr key={idx} className="hover:bg-slate-800/20 transition-colors">
+                  <td className="px-4 py-4 font-mono text-xs text-teal-400">{row.permit}</td>
+                  <td className="px-4 py-4 text-slate-300 max-w-[150px] truncate">{row.site}</td>
+                  <td className="px-4 py-4 text-right">
+                    <span className={`inline-block px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded border ${row.statusColor}`}>
+                      {row.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+    </div>
   );
 }

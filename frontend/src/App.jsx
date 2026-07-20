@@ -6,20 +6,23 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import CitizenDashboard from '@/components/CitizenDashboard';
 import AdminDashboard from '@/components/AdminDashboard';
 import LandingPage from '@/components/LandingPage';
+import ReportPollution from '@/components/ReportPollution';
 
 function App() {
-  // Global Auth State: null | 'citizen' | 'admin'
-  const [authRole, setAuthRole] = useState(null);
+  const [authRole, setAuthRole] = useState(localStorage.getItem('authRole') || null);
+  const [adminCity, setAdminCity] = useState(localStorage.getItem('adminCity') || null);
 
   const handleLogout = () => {
+    localStorage.removeItem('authRole');
+    localStorage.removeItem('adminCity');
     setAuthRole(null);
+    setAdminCity(null);
   };
 
   return (
     <Router>
       <div className="min-h-screen bg-background text-foreground flex flex-col antialiased">
         
-        {/* Only render the top Nav Bar if a user is successfully logged in */}
         {authRole && (
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between mx-auto px-4 md:px-6">
@@ -28,7 +31,6 @@ function App() {
                 <div className="font-bold tracking-tight text-xl bg-gradient-to-r from-slate-900 to-slate-600 dark:from-slate-50 dark:to-slate-400 bg-clip-text text-transparent">
                   Aero TraceAI
                 </div>
-                {/* Visual indicator of current role */}
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${authRole === 'admin' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'}`}>
                   {authRole} Portal
                 </span>
@@ -49,17 +51,15 @@ function App() {
 
         <main className="flex-1 flex flex-col">
           <Routes>
-            {/* The Entry Gateway */}
             <Route 
               path="/" 
               element={
-                !authRole ? <LandingPage setAuthRole={setAuthRole} /> : 
+                !authRole ? <LandingPage setAuthRole={setAuthRole} setAdminCity={setAdminCity} /> : 
                 authRole === 'admin' ? <Navigate to="/admin" replace /> : 
                 <Navigate to="/citizen" replace />
               } 
             />
 
-            {/* Locked Citizen Route */}
             <Route 
               path="/citizen" 
               element={
@@ -67,11 +67,17 @@ function App() {
               } 
             />
 
-            {/* Locked Admin Route */}
+            <Route 
+              path="/report" 
+              element={
+                authRole === 'citizen' ? <ReportPollution /> : <Navigate to="/" replace />
+              } 
+            />
+
             <Route 
               path="/admin" 
               element={
-                authRole === 'admin' ? <AdminDashboard /> : <Navigate to="/" replace />
+                authRole === 'admin' ? <AdminDashboard jurisdiction={adminCity} /> : <Navigate to="/" replace />
               } 
             />
           </Routes>

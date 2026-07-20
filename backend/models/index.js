@@ -2,11 +2,12 @@
 import sequelize from '../config/database.js';
 import Zone from './Zone.js';
 import SensorReading from './SensorReading.js';
-import User from './User.js';
+import Citizen from './citizen.js'; // <-- REPLACED User.js
+import Admin from './admin.js';     // <-- NEW IMPORT
 import AttributionInsight from './AttributionInsight.js';
 import Advisory from './Advisory.js';
 import CitizenAlert from './CitizenAlert.js';
-import InterventionLog from './InterventionLog.js'; // <-- NEW IMPORT
+import InterventionLog from './InterventionLog.js';
 
 // --- Define Database Relationships ---
 
@@ -26,21 +27,22 @@ Advisory.belongsTo(Zone, { foreignKey: 'zoneId' });
 Zone.hasMany(CitizenAlert, { foreignKey: 'zoneId' });
 CitizenAlert.belongsTo(Zone, { foreignKey: 'zoneId' });
 
-// User <-> CitizenAlert (To track who uploaded the photo)
-User.hasMany(CitizenAlert, { foreignKey: 'userId' });
-CitizenAlert.belongsTo(User, { foreignKey: 'userId' });
+// Citizen <-> CitizenAlert (To track which citizen uploaded the photo)
+Citizen.hasMany(CitizenAlert, { foreignKey: 'userId' }); // Kept 'userId' to prevent DB migration errors
+CitizenAlert.belongsTo(Citizen, { foreignKey: 'userId' });
 
 // Zone <-> InterventionLog (To track compliance and actions per zone)
-Zone.hasMany(InterventionLog, { foreignKey: 'zoneId' }); // <-- NEW RELATIONSHIP
-InterventionLog.belongsTo(Zone, { foreignKey: 'zoneId' }); // <-- NEW RELATIONSHIP
+Zone.hasMany(InterventionLog, { foreignKey: 'zoneId' });
+InterventionLog.belongsTo(Zone, { foreignKey: 'zoneId' });
 
 export {
   sequelize,
   Zone,
   SensorReading,
-  User,
+  Citizen, // <-- EXPORTED NEW MODEL
+  Admin,   // <-- EXPORTED NEW MODEL
   AttributionInsight,
   Advisory,
   CitizenAlert,
-  InterventionLog // <-- EXPORTED
+  InterventionLog
 };
