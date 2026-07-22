@@ -202,10 +202,6 @@ Localized AQI + Advisory
 
 ---
 
-# 🖥️ User Interface
-
-
----
 
 # 🚀 Future Scope
 
