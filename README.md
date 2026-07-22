@@ -40,6 +40,9 @@ Identifies whether pollution is caused by:
 
 instead of simply displaying AQI values.
 
+<img width="1568" height="753" alt="image" src="https://github.com/user-attachments/assets/e3599acf-fb19-44bb-bb75-8cc696d9e2b8" />
+
+
 ---
 
 ### 🏛️ Smart Admin Dashboard
@@ -50,6 +53,9 @@ instead of simply displaying AQI values.
 - Multi-Zone Comparison
 - Action Recommendations
 
+  <img width="1568" height="762" alt="image" src="https://github.com/user-attachments/assets/7a38fb4b-3bfe-4ad6-935a-0d80be8a22a5" />
+
+
 ---
 
 ### 👨‍👩‍👧 Citizen Portal
@@ -59,6 +65,9 @@ instead of simply displaying AQI values.
 - Hyperlocal Health Advisories
 - Regional Language Support
 - Pollution Reporting with Image Upload
+
+  <img width="1568" height="746" alt="image" src="https://github.com/user-attachments/assets/24e39560-a561-43f6-9bc0-507056044bba" />
+
 
 ---
 
@@ -247,18 +256,6 @@ Aero-TraceAI/
 
 ---
 
-# 👥 Team
-
-**Team Name:** *(Your Team Name)*
-
-| Name | Role |
-|------|------|
-| Your Name | Full Stack Developer |
-| Member 2 | AI Engineer |
-| Member 3 | Backend Developer |
-| Member 4 | Frontend Developer |
-
----
 
 # 🔗 Links
 
@@ -267,31 +264,11 @@ Aero-TraceAI/
 Replace with your deployed application link.
 
 ```
-https://your-live-link.com
+https://aero-trace-ai.vercel.app
 ```
 
 ---
 
-## 🎥 Demo Video
 
-Replace with your YouTube video.
 
-```
-https://youtube.com/....
-```
 
----
-
-## 📄 Documentation
-
-Add your documentation PDF or DOCX.
-
----
-
-<div align="center">
-
-## ⭐ If you like this project, don't forget to star the repository!
-
-Made with ❤️ for building cleaner and smarter cities.
-
-</div>
